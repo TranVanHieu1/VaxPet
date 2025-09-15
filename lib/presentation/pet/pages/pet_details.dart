@@ -1,0 +1,490 @@
+import 'package:flutter/material.dart';
+import 'package:vaxpet/common/helper/navigation/app_navigation.dart';
+import '../../../common/widgets/back_button/back_button.dart';
+import '../../../core/configs/theme/app_colors.dart';
+import '../../appointment_health_certificate/pages/appointment_health_certificate_choice.dart';
+import '../../appointment_health_certificate_note/pages/appointment_health_certificate_note.dart';
+import '../../appointment_microchip/pages/appointment_microchip_choice.dart';
+import '../../appointment_microchip_note/pages/appointment_microchip_note.dart';
+import '../../appointment_vaccination/pages/appointment_vaccination_choice.dart';
+import '../../appointment_vaccination_note/pages/appointment_vaccination_note.dart';
+import '../../pet_information/pages/pet_information.dart';
+import '../../pet_record/pages/pet_record.dart';
+import '../../sample_schedule_pet/pages/sample_schedule_pet.dart';
+import '../../tips_pet/pages/tips_pet.dart';
+
+class PetDetailsPage extends StatelessWidget {
+  final int petId;
+  final String petName;
+  final String? petImage;
+  final String petSpecies;
+  final String? petBirthday;
+  const PetDetailsPage({
+    super.key,
+    required this.petId,
+    required this.petName,
+    this.petImage,
+    required this.petSpecies,
+    this.petBirthday,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Lấy kích thước màn hình để tính toán tỷ lệ
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
+
+    // Tính toán padding dựa trên chiều rộng màn hình - responsive
+    final double horizontalPadding = screenWidth * 0.04;
+    final bool isTablet = screenWidth > 600;
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header section with blue background extending to status bar
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withValues(alpha: 0.8),
+                  ],
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Back button positioned in header
+                  Container(
+                    alignment: Alignment.topLeft,
+                    padding: EdgeInsets.only(
+                      top: screenHeight * 0.01,
+                      left: horizontalPadding,
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 2,
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Pet Profile Section
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                width: 3,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Hero(
+                              tag: 'pet-$petId',
+                              child: CircleAvatar(
+                                radius:
+                                    isTablet
+                                        ? screenWidth * 0.08
+                                        : screenWidth * 0.12,
+                                backgroundColor: Colors.white,
+                                backgroundImage:
+                                    petImage != null && petImage!.isNotEmpty
+                                        ? NetworkImage(petImage!)
+                                        : null,
+                                child:
+                                    petImage == null || petImage!.isEmpty
+                                        ? Icon(
+                                          Icons.pets,
+                                          size:
+                                              isTablet
+                                                  ? screenWidth * 0.08
+                                                  : screenWidth * 0.10,
+                                          color: Colors.grey[600],
+                                        )
+                                        : null,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.015),
+                          Text(
+                            petName,
+                            style: TextStyle(
+                              fontSize:
+                                  isTablet
+                                      ? screenWidth * 0.04
+                                      : screenWidth * 0.06,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: screenHeight * 0.005),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.4),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              petSpecies,
+                              style: TextStyle(
+                                fontSize:
+                                    isTablet
+                                        ? screenWidth * 0.025
+                                        : screenWidth * 0.035,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Services Card Section
+            _buildSectionCard(
+              context,
+              title: 'Đặt dịch vụ',
+              child: _buildServiceGrid(context, [
+                ServiceItem(
+                  title: 'Vắc xin',
+                  icon: Icons.vaccines,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      AppointmentVaccinationChoicePage(
+                        petName: petName,
+                        petId: petId,
+                        petSpecies: petSpecies,
+                        petImage: petImage,
+                      ),
+                    );
+                  },
+                ),
+                ServiceItem(
+                  title: 'Microchip',
+                  icon: Icons.qr_code,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      AppointmentMicrochipChoicePage(
+                        petName: petName,
+                        petId: petId,
+                        petSpecies: petSpecies,
+                      ),
+                    );
+                  },
+                ),
+                ServiceItem(
+                  title: 'Chứng nhận sức khỏe',
+                  icon: Icons.book,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      AppointmentHealthCertificateChoicePage(
+                        petName: petName,
+                        petId: petId,
+                        petSpecies: petSpecies,
+                      ),
+                    );
+                  },
+                ),
+              ]),
+            ),
+
+            SizedBox(height: screenHeight * 0.02),
+
+            // Pet Records Card Section
+            _buildSectionCard(
+              context,
+              title: 'Sổ ghi chép',
+              child: _buildServiceGrid(context, [
+                ServiceItem(
+                  title: 'Vắc xin',
+                  icon: Icons.vaccines,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      AppointmentVaccinationNotePage(
+                        petName: petName,
+                        petId: petId,
+                        petSpecies: petSpecies,
+                      ),
+                    );
+                  },
+                ),
+                ServiceItem(
+                  title: 'Microchip',
+                  icon: Icons.qr_code,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      AppointmentMicrochipNotePage(
+                        petName: petName,
+                        petId: petId,
+                        petSpecies: petSpecies,
+                      ),
+                    );
+                  },
+                ),
+                ServiceItem(
+                  title: 'Chứng nhận sức khỏe',
+                  icon: Icons.book,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      AppointmentHealthCertificateNotePage(
+                        petName: petName,
+                        petId: petId,
+                        petSpecies: petSpecies,
+                      ),
+                    );
+                  },
+                ),
+                ServiceItem(
+                  title: 'Lịch gợi ý',
+                  icon: Icons.calendar_month,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      SampleSchedulePetPage(
+                        petName: petName,
+                        petId: petId,
+                        petBirthday: petBirthday,
+                        petSpecies: petSpecies,
+                      ),
+                    );
+                  },
+                ),
+                ServiceItem(
+                  title: 'Cẩm nang',
+                  icon: Icons.tips_and_updates,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      TipsPetPage(
+                        petName: petName,
+                        petId: petId,
+                        petBirthday: petBirthday,
+                        petSpecies: petSpecies,
+                      ),
+                    );
+                  },
+                ),
+              ]),
+            ),
+
+            SizedBox(height: screenHeight * 0.02),
+
+            // Pet Info Card Section
+            _buildSectionCard(
+              context,
+              title: 'Thông tin thú cưng',
+              child: _buildServiceGrid(context, [
+                ServiceItem(
+                  title: 'Thông tin',
+                  icon: Icons.medical_information,
+                  onTap: () {
+                    // Navigate to pet information page
+                    AppNavigator.push(
+                      context,
+                      PetInformationPage(petId: petId),
+                    );
+                  },
+                ),
+                ServiceItem(
+                  title: 'Hồ sơ tiêm chủng',
+                  icon: Icons.emergency_recording,
+                  onTap: () {
+                    AppNavigator.push(
+                      context,
+                      PetRecordPage(
+                        petId: petId,
+                        petName: petName,
+                        petSpecies: petSpecies,
+                        petImage: petImage,
+                      ),
+                    );
+                  },
+                ),
+              ]),
+            ),
+
+            SizedBox(height: screenHeight * 0.05),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build section cards with a consistent design
+  Widget _buildSectionCard(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            spreadRadius: 0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              screenWidth * 0.04,
+              screenHeight * 0.02,
+              screenWidth * 0.04,
+              screenHeight * 0.01,
+            ),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: screenWidth > 600 ? 20 : 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textBlack,
+              ),
+            ),
+          ),
+          Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+          Padding(padding: EdgeInsets.all(screenWidth * 0.03), child: child),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to build a responsive service grid
+  Widget _buildServiceGrid(BuildContext context, List<ServiceItem> items) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+    final gridCount = isTablet ? 3 : 2;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: gridCount,
+        childAspectRatio: isTablet ? 1.5 : 1.2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return _buildServiceItem(context, item);
+      },
+    );
+  }
+
+  // Helper method to build a service item with consistent design
+  Widget _buildServiceItem(BuildContext context, ServiceItem item) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 600;
+    final iconSize = isTablet ? screenWidth * 0.04 : screenWidth * 0.06;
+
+    return InkWell(
+      onTap: item.onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        padding: EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              item.icon,
+              size: iconSize,
+              color: Theme.of(context).primaryColor,
+            ),
+            SizedBox(height: 8),
+            Text(
+              item.title,
+              style: TextStyle(
+                fontSize: isTablet ? 14 : 12,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Helper class to store service item data
+class ServiceItem {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  ServiceItem({required this.title, required this.icon, required this.onTap});
+}

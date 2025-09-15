@@ -1,0 +1,1 @@
+enum LocationTypeEnum { clinic, homeVisit }
